@@ -1,0 +1,13 @@
+fileFormatVersion: 2
+guid: 28bb738acb86b8f49bf47cafd28c2a97
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - m_ViewDataDictionary: {instanceID: 0}
+  - markerBTNSkin: {fileID: 11400000, guid: 5aee0f7e76d34984fb9c809487330f60, type: 2}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
