@@ -42,6 +42,8 @@ namespace Editor.AudioEditor
             previewImage.style.position = Position.Absolute;
             imageContainer.Add(previewImage);
 
+            // Register mouse down event for playhead movement
+            previewImage.RegisterCallback<PointerDownEvent>(OnWaveformClicked);
             waveformWidth = 1000;
 
             // Create playhead element
@@ -56,6 +58,30 @@ namespace Editor.AudioEditor
             playheadSample = 0;
         }
 
+        private void OnWaveformClicked(PointerDownEvent evt)
+        {
+            if (currentClip == null || waveformTexture == null)
+                return;
+            // Only respond to left mouse button
+            if (evt.button != 0)
+                return;
+            float localX = evt.localPosition.x;
+            localX = Mathf.Clamp(localX, 0, waveformWidth - 1);
+            float normalized = localX / (float)waveformWidth;
+            int sample = Mathf.RoundToInt(normalized * (currentClip.samples - 1));
+
+            // Move playhead to clicked position
+            playheadSample = sample;
+            RenderPlayhead();
+
+            // If playing, stop current playback and start at new position
+            if (isPlaying)
+            {
+                AudioUtilWrapper.StopAllPreviewClips();
+                AudioUtilWrapper.PlayPreviewClip(currentClip, playheadSample, false);
+            }
+        }
+
         private void OnPlayButtonClicked()
         {
             if (currentClip == null)
@@ -65,7 +91,9 @@ namespace Editor.AudioEditor
             {
                 isPlaying = true;
                 playButton.text = "Stop";
-                AudioUtilWrapper.PlayPreviewClip(currentClip, 0, false);
+                // Stop any current playback before starting new
+                AudioUtilWrapper.StopAllPreviewClips();
+                AudioUtilWrapper.PlayPreviewClip(currentClip, playheadSample, false);
                 EditorApplication.update += UpdatePlayheadDuringPlayback;
             }
             else
@@ -309,4 +337,3 @@ namespace Editor.AudioEditor
         }
     }
 }
-
