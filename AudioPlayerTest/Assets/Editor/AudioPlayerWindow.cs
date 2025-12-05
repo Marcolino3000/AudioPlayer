@@ -207,7 +207,6 @@ namespace Editor.AudioEditor
             playheadSample = AudioUtilWrapper.GetPreviewClipSamplePosition();
             RenderPlayhead();
 
-            // Stop when finished
             if (!AudioUtilWrapper.IsPreviewClipPlaying())
             {
                 // isPlaying = false;
@@ -219,7 +218,6 @@ namespace Editor.AudioEditor
 
         private void RenderPlayhead()
         {
-            // Only show playhead if waveform is present
             if (waveformTexture == null || previewImage == null)
             {
                 playheadElement.style.display = DisplayStyle.None;
@@ -232,15 +230,15 @@ namespace Editor.AudioEditor
             float normalized = samplesCount > 1 ? (float)playheadSample / (float)samplesCount : 0f;
             int x = Mathf.Clamp(Mathf.RoundToInt(normalized * waveformWidth), 0, waveformWidth - playheadWidth);
             playheadElement.style.left = x;
-            playheadElement.style.height = waveformHeight;
-            playheadElement.style.width = playheadWidth;
+            // playheadElement.style.height = waveformHeight;
+            // playheadElement.style.width = playheadWidth;
         }
 
         private void UpdateWaveformTexture()
         {
-            // clear if no clip selected
             if (currentClip == null)
             {
+                return;
                 if (previewImage != null)
                     previewImage.image = null;
 
