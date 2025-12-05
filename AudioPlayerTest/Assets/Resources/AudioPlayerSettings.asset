@@ -12,6 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3ccab4e7e7e24750bac540c7c7cbeecf, type: 3}
   m_Name: AudioPlayerSettings
   m_EditorClassIdentifier: Assembly-CSharp-Editor::Editor.AudioEditor.AudioPlayerSettings
-  waveformWidth: 123
-  waveformHeight: 123
+  waveformWidth: 900
+  waveformHeight: 100
   waveformColor: {r: 0.14950721, g: 0.8962264, b: 0.12259703, a: 1}

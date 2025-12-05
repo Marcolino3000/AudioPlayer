@@ -284,11 +284,10 @@ namespace Editor.AudioEditor
             }
 
             label.text = Selection.activeObject.name;
-            var wrapper = Selection.activeObject as AudioClipWrapper;
-            if (wrapper != null)
-                currentClip = wrapper.audioClip;
-            else
-                currentClip = Selection.activeObject as AudioClip;
+            currentClip = Selection.activeObject as AudioClip;
+
+            if (currentClip == null)
+                return;
             
             isPlaying = false;
             playButton.text = "Play";
