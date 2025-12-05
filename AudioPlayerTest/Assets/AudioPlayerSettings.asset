@@ -1,0 +1,17 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3ccab4e7e7e24750bac540c7c7cbeecf, type: 3}
+  m_Name: AudioPlayerSettings
+  m_EditorClassIdentifier: Assembly-CSharp-Editor::Editor.AudioEditor.AudioPlayerSettings
+  waveformWidth: 123
+  waveformHeight: 123
+  waveformColor: {r: 0.14950721, g: 0.8962264, b: 0.12259703, a: 1}

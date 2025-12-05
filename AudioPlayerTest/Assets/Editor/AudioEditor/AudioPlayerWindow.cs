@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -24,10 +25,36 @@ namespace Editor.AudioEditor
         private Button playButton;
         private bool isPlaying = false;
 
+        private AudioPlayerSettings settings;
+
         public void CreateGUI()
         {
+            // Find AudioPlayerSettings asset in project if not assigned
+            if (settings == null)
+            {
+                string[] guids = UnityEditor.AssetDatabase.FindAssets("t:AudioPlayerSettings");
+                if (guids.Length > 0)
+                {
+                    string path = UnityEditor.AssetDatabase.GUIDToAssetPath(guids[0]);
+                    settings = UnityEditor.AssetDatabase.LoadAssetAtPath<AudioPlayerSettings>(path);
+                }
+                else
+                {
+                    Debug.LogWarning("AudioPlayerSettings asset not found in project.");
+                }
+            }
+
             label = new Label(Selection.activeObject != null ? Selection.activeObject.name : "(none)");
             rootVisualElement.Add(label);
+
+            // Add scale slider
+            var scaleSlider = new Slider("Scale", 0.1f, 5.0f);
+            scaleSlider.value = scale;
+            scaleSlider.RegisterValueChangedCallback(evt => {
+                scale = evt.newValue;
+                UpdateWaveformTexture();
+            });
+            rootVisualElement.Add(scaleSlider);
 
             playButton = new Button(OnPlayButtonClicked) { text = "Play" };
             rootVisualElement.Add(playButton);
@@ -44,7 +71,6 @@ namespace Editor.AudioEditor
 
             // Register mouse down event for playhead movement
             previewImage.RegisterCallback<PointerDownEvent>(OnWaveformClicked);
-            waveformWidth = 1000;
 
             // Create playhead element
             playheadElement = new VisualElement();
@@ -145,6 +171,11 @@ namespace Editor.AudioEditor
 
         private void UpdateWaveformTexture()
         {
+            // Use settings for waveform dimensions and color
+            waveformWidth = Mathf.RoundToInt(settings.waveformWidth * scale);
+            waveformHeight = settings.waveformHeight;
+            waveformColor = settings.waveformColor;
+
             // clear if no clip selected
             if (currentClip == null)
             {
