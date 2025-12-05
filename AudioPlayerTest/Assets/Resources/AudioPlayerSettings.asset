@@ -14,4 +14,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp-Editor::Editor.AudioEditor.AudioPlayerSettings
   waveformWidth: 900
   waveformHeight: 100
-  waveformColor: {r: 0.14950721, g: 0.8962264, b: 0.12259703, a: 1}
+  waveformColor: {r: 0.21982914, g: 0.25795037, b: 0.7169812, a: 1}

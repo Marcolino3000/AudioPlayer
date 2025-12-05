@@ -7,47 +7,110 @@ namespace Editor.AudioEditor
 {
     public class AudioPlayerWindow : EditorWindow
     {
-        private Label label;
+        private Label debugLabel;
         private AudioClip currentClip;
         private Image previewImage;
-        private Texture2D previewTexture;
         private Texture2D waveformTexture;
         private int waveformWidth;
         private int waveformHeight = 128;
         private Color waveformColor = Color.white;
         private float scale = 1.0f;
-
+        private VisualElement waveformImageContainer;
+        
         private VisualElement playheadElement;
-        private int playheadSample = 0; // sample index for playhead
+        private int playheadSample = 0;
         private Color playheadColor = Color.red;
         private int playheadWidth = 2;
 
         private Button playButton;
-        private bool isPlaying = false;
+        private bool isPlaying;
+        
+        private StyleSheet borderStylesheet;
 
         private AudioPlayerSettings settings;
 
         public void CreateGUI()
         {
-            // Find AudioPlayerSettings asset in project if not assigned
-            if (settings == null)
+            Debug.Log("CreateGUI");
+            
+            LoadStyleSheets();
+            LoadAudioPlayerSettings();
+            ApplyAudioPlayerSettings();
+
+            debugLabel = new Label(Selection.activeObject != null ? Selection.activeObject.name : "(none)");
+            rootVisualElement.Add(debugLabel);
+
+            AddScaleSlider();
+            AddPlayButton();
+
+            AddWaveformImageContainer();
+
+            AddWaveformImage();
+
+            AddPlayhead();
+
+            
+        }
+
+  
+
+#region Visual Elements
+        
+        private void LoadStyleSheets()
+        {
+            string[] guids = AssetDatabase.FindAssets("t:StyleSheet");
+            if (guids.Length > 0)
             {
-                string[] guids = UnityEditor.AssetDatabase.FindAssets("t:AudioPlayerSettings");
-                if (guids.Length > 0)
-                {
-                    string path = UnityEditor.AssetDatabase.GUIDToAssetPath(guids[0]);
-                    settings = UnityEditor.AssetDatabase.LoadAssetAtPath<AudioPlayerSettings>(path);
-                }
-                else
-                {
-                    Debug.LogWarning("AudioPlayerSettings asset not found in project.");
-                }
+                string path = AssetDatabase.GUIDToAssetPath(guids[0]);
+                borderStylesheet = AssetDatabase.LoadAssetAtPath<StyleSheet>(path);    
             }
+            else
+            {
+                Debug.Log("no styles found");
+            }
+        }
+        private void AddPlayhead()
+        {
+            playheadElement = new VisualElement();
+            playheadElement.style.position = Position.Absolute;
+            playheadElement.style.top = 0;
+            playheadElement.style.height = waveformHeight;
+            playheadElement.style.width = playheadWidth;
+            playheadElement.style.backgroundColor = playheadColor;
+            waveformImageContainer.Add(playheadElement);
+            
+            playheadSample = 0;
+        }
 
-            label = new Label(Selection.activeObject != null ? Selection.activeObject.name : "(none)");
-            rootVisualElement.Add(label);
+        private void AddWaveformImage()
+        {
+            previewImage = new Image();
+            previewImage.style.flexGrow = 1;
+            previewImage.style.position = Position.Absolute;
+            waveformImageContainer.Add(previewImage);
+            
+            waveformImageContainer.styleSheets.Add(borderStylesheet);
+            
+            previewImage.RegisterCallback<PointerDownEvent>(OnWaveformClicked);
+        }
 
-            // Add scale slider
+        private void AddWaveformImageContainer()
+        {
+            waveformImageContainer = new VisualElement();
+            waveformImageContainer.style.flexGrow = 1;
+            waveformImageContainer.style.height = waveformHeight;
+
+            rootVisualElement.Add(waveformImageContainer);
+        }
+
+        private void AddPlayButton()
+        {
+            playButton = new Button(OnPlayButtonClicked) { text = "Play" };
+            rootVisualElement.Add(playButton);
+        }
+
+        private void AddScaleSlider()
+        {
             var scaleSlider = new Slider("Scale", 0.1f, 5.0f);
             scaleSlider.value = scale;
             scaleSlider.RegisterValueChangedCallback(evt => {
@@ -55,52 +118,48 @@ namespace Editor.AudioEditor
                 UpdateWaveformTexture();
             });
             rootVisualElement.Add(scaleSlider);
+        }
+        #endregion
 
-            playButton = new Button(OnPlayButtonClicked) { text = "Play" };
-            rootVisualElement.Add(playButton);
+        private void LoadAudioPlayerSettings()
+        {
+            if (settings == null)
+            {
+                string[] guids = AssetDatabase.FindAssets("t:AudioPlayerSettings");
+                if (guids.Length > 0)
+                {
+                    string path = AssetDatabase.GUIDToAssetPath(guids[0]);
+                    settings = AssetDatabase.LoadAssetAtPath<AudioPlayerSettings>(path);
+                }
+                else
+                {
+                    Debug.LogWarning("AudioPlayerSettings asset not found in project.");
+                }
+            }
+        }
 
-            var imageContainer = new VisualElement();
-            imageContainer.style.flexGrow = 1;
-            imageContainer.style.height = waveformHeight;
-            rootVisualElement.Add(imageContainer);
-            
-            previewImage = new Image();
-            previewImage.style.flexGrow = 1;
-            previewImage.style.position = Position.Absolute;
-            imageContainer.Add(previewImage);
-
-            // Register mouse down event for playhead movement
-            previewImage.RegisterCallback<PointerDownEvent>(OnWaveformClicked);
-
-            // Create playhead element
-            playheadElement = new VisualElement();
-            playheadElement.style.position = Position.Absolute;
-            playheadElement.style.top = 0;
-            playheadElement.style.height = waveformHeight;
-            playheadElement.style.width = playheadWidth;
-            playheadElement.style.backgroundColor = playheadColor;
-            imageContainer.Add(playheadElement);
-
-            playheadSample = 0;
+        private void ApplyAudioPlayerSettings()
+        {
+            waveformWidth = Mathf.RoundToInt(settings.waveformWidth * scale);
+            waveformHeight = settings.waveformHeight;
+            waveformColor = settings.waveformColor;
         }
 
         private void OnWaveformClicked(PointerDownEvent evt)
         {
-            if (currentClip == null || waveformTexture == null)
-                return;
-            // Only respond to left mouse button
-            if (evt.button != 0)
-                return;
+            if (currentClip == null || waveformTexture == null) return;
+            
+            if (evt.button != 0) return;
+            
             float localX = evt.localPosition.x;
-            localX = Mathf.Clamp(localX, 0, waveformWidth - 1);
-            float normalized = localX / (float)waveformWidth;
-            int sample = Mathf.RoundToInt(normalized * (currentClip.samples - 1));
+            // localX = Mathf.Clamp(localX, 0, waveformWidth - 1);
+            float normalized = localX / waveformWidth;
+            playheadSample = Mathf.RoundToInt(normalized * (currentClip.samples - 1));
 
-            // Move playhead to clicked position
-            playheadSample = sample;
             RenderPlayhead();
 
-            // If playing, stop current playback and start at new position
+            Debug.Log("waveform clicked");
+            
             if (isPlaying)
             {
                 AudioUtilWrapper.StopAllPreviewClips();
@@ -115,20 +174,29 @@ namespace Editor.AudioEditor
 
             if (!isPlaying)
             {
-                isPlaying = true;
-                playButton.text = "Stop";
-                // Stop any current playback before starting new
-                AudioUtilWrapper.StopAllPreviewClips();
-                AudioUtilWrapper.PlayPreviewClip(currentClip, playheadSample, false);
-                EditorApplication.update += UpdatePlayheadDuringPlayback;
+                StartPlaying();
             }
             else
             {
-                isPlaying = false;
-                playButton.text = "Play";
-                AudioUtilWrapper.StopAllPreviewClips();
-                EditorApplication.update -= UpdatePlayheadDuringPlayback;
+                StopPlaying();
             }
+        }
+
+        private void StartPlaying()
+        {
+            isPlaying = true;
+            playButton.text = "Stop";
+            AudioUtilWrapper.StopAllPreviewClips();
+            AudioUtilWrapper.PlayPreviewClip(currentClip, playheadSample, false);
+            EditorApplication.update += UpdatePlayheadDuringPlayback;
+        }
+
+        private void StopPlaying()
+        {
+            isPlaying = false;
+            playButton.text = "Play";
+            AudioUtilWrapper.StopAllPreviewClips();
+            EditorApplication.update -= UpdatePlayheadDuringPlayback;
         }
 
         private void UpdatePlayheadDuringPlayback()
@@ -136,17 +204,16 @@ namespace Editor.AudioEditor
             if (!isPlaying || currentClip == null)
                 return;
 
-            // Get current sample position from AudioUtilWrapper
-            int samplePos = AudioUtilWrapper.GetPreviewClipSamplePosition();
-            playheadSample = samplePos;
+            playheadSample = AudioUtilWrapper.GetPreviewClipSamplePosition();
             RenderPlayhead();
 
             // Stop when finished
             if (!AudioUtilWrapper.IsPreviewClipPlaying())
             {
-                isPlaying = false;
-                playButton.text = "Play";
-                EditorApplication.update -= UpdatePlayheadDuringPlayback;
+                // isPlaying = false;
+                // playButton.text = "Play";
+                // EditorApplication.update -= UpdatePlayheadDuringPlayback;
+                StopPlaying();
             }
         }
 
@@ -171,11 +238,6 @@ namespace Editor.AudioEditor
 
         private void UpdateWaveformTexture()
         {
-            // Use settings for waveform dimensions and color
-            waveformWidth = Mathf.RoundToInt(settings.waveformWidth * scale);
-            waveformHeight = settings.waveformHeight;
-            waveformColor = settings.waveformColor;
-
             // clear if no clip selected
             if (currentClip == null)
             {
@@ -268,33 +330,41 @@ namespace Editor.AudioEditor
             if (previewImage != null)
                 previewImage.image = waveformTexture;
 
-            // Update playhead after waveform is drawn
             RenderPlayhead();
         }
 
         public void OnSelectionChange()
         {
-            if (Selection.activeObject == null)
-            {
-                label.text = "(none)";
-                if (previewImage != null)
-                    previewImage.image = null;
-                currentClip = null;
-                return;
-            }
-
-            label.text = Selection.activeObject.name;
-            currentClip = Selection.activeObject as AudioClip;
-
-            if (currentClip == null)
-                return;
+            Debug.Log("onSelectionChange");
             
-            isPlaying = false;
-            playButton.text = "Play";
-            AudioUtilWrapper.StopAllPreviewClips();
-            EditorApplication.update -= UpdatePlayheadDuringPlayback;
+            if (SetCurrentClip()) return;
+
+            StopPlaying();
+            playheadSample = 0;
+            
+            ApplyAudioPlayerSettings();
+
             UpdateWaveformTexture();
             RenderPlayhead();
+        }
+
+        private bool SetCurrentClip()
+        {
+            if (Selection.activeObject == null)
+            {
+                debugLabel.text = "(none)";
+                // if (previewImage != null)
+                previewImage.image = null;
+                currentClip = null;
+                return true;
+            }
+            
+            debugLabel.text = Selection.activeObject.name;
+            currentClip = Selection.activeObject as AudioClip;
+            
+            if (currentClip == null)
+                return true;
+            return false;
         }
 
         [MenuItem("Tools/AudioPlayer")]
