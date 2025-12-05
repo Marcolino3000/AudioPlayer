@@ -297,73 +297,12 @@ namespace Editor.AudioEditor
             RenderPlayhead();
         }
 
-        private void GetPreviewTexture()
-        {
-            // Try to get the asset preview; if none, create a fallback green texture
-            previewTexture = null;
-            if (currentClip != null)
-            {
-                previewTexture = AssetPreview.GetAssetPreview(currentClip);
-                if (previewTexture == null)
-                {
-                    // Fallback: simple green texture with configured size
-                    int w = 256, h = 128;
-                    var tex = new Texture2D(w, h, TextureFormat.RGBA32, false);
-                    Color[] cols = new Color[w * h];
-                    for (int i = 0; i < cols.Length; i++) cols[i] = Color.green;
-                    tex.SetPixels(cols);
-                    tex.Apply();
-                    previewTexture = tex;
-                }
-            }
-
-            previewImage.image = previewTexture;
-        }
-
         [MenuItem("Tools/AudioPlayer")]
-        public static void Show()
+        public static void ShowWindow()
         {
             var window = GetWindow<AudioPlayerWindow>();
             window.titleContent = new GUIContent("Audio Player");
         }
-
-        private void TryingToUseAudioCurveRendering()
-        {
-            var frame = new VisualElement();
-            frame.style.height = 200;
-            frame.style.width = 300;
-            var rect = frame.contentRect;
-
-
-            Color curveColor = new Color(1f, 0.54901963f, 0.0f, 1f);
-            AudioCurveRendering.AudioMinMaxCurveAndColorEvaluator eval =
-                (AudioCurveRendering.AudioMinMaxCurveAndColorEvaluator)((float x, out Color col, out float minValue,
-                    out float maxValue) =>
-                {
-                    col = curveColor;
-                    if (10000 <= 0)
-                    {
-                        minValue = 0.0f;
-                        maxValue = 0.0f;
-                    }
-                    else
-                    {
-                        int index1 = ((int)Mathf.Floor(Mathf.Clamp(x * (float)(10000 - 2), 0.0f, (float)(10000 - 2)))) *
-                                     2;
-                        int index2 = index1 + 1 * 2;
-                        minValue = 0;
-                        maxValue = 10;
-                        if ((double)minValue > (double)maxValue)
-                        {
-                            float num = minValue;
-                            minValue = maxValue;
-                            maxValue = num;
-                        }
-                    }
-                });
-            AudioCurveRendering.DrawMinMaxFilledCurve(rect, eval);
-
-            rootVisualElement.Add(frame);
-        }
+        
     }
 }
