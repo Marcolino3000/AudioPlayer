@@ -31,8 +31,6 @@ namespace Editor.AudioEditor
 
         public void CreateGUI()
         {
-            Debug.Log("CreateGUI");
-            
             LoadStyleSheets();
             LoadAudioPlayerSettings();
             ApplyAudioPlayerSettings();
@@ -44,12 +42,8 @@ namespace Editor.AudioEditor
             AddPlayButton();
 
             AddWaveformImageContainer();
-
             AddWaveformImage();
-
             AddPlayhead();
-
-            
         }
 
   
@@ -256,72 +250,70 @@ namespace Editor.AudioEditor
             if (samplesCount <= 0 || channels <= 0)
                 return;
 
-            // read samples (interleaved channels)
             float[] allSamples = new float[samplesCount * channels];
-            bool ok = currentClip.GetData(allSamples, 0);
-            if (!ok)
-                return;
+            bool hasRetrievedData = currentClip.GetData(allSamples, 0);
+            if (!hasRetrievedData) return;
 
-            int width = waveformWidth;
-            int height = waveformHeight;
+            // int width = waveformWidth;
+            // int height = waveformHeight;
 
-            int samplesPerPixel = Mathf.Max(1, Mathf.CeilToInt((float)samplesCount / width));
-
-            // --- NORMALIZATION ---
-            float maxAbs = 0f;
+            int samplesPerPixel = Mathf.Max(1, Mathf.CeilToInt((float)samplesCount / waveformWidth));
+            
+            float clipMaxPeak = 0f;
             for (int i = 0; i < allSamples.Length; i++)
             {
                 float abs = Mathf.Abs(allSamples[i]);
-                if (abs > maxAbs) maxAbs = abs;
+                
+                if (abs > clipMaxPeak) 
+                    clipMaxPeak = abs;
             }
-            if (maxAbs < 1e-6f) maxAbs = 1f; // avoid division by zero
+            if (clipMaxPeak < 1e-6f) clipMaxPeak = 1f; // avoid division by zero
 
-            // prepare pixel buffer (clear with transparent background)
             Color clearColor = new Color(0f, 0f, 0f, 0f);
-            Color[] pixels = new Color[width * height];
-            for (int i = 0; i < pixels.Length; i++) pixels[i] = clearColor;
+            Color[] pixels = new Color[waveformWidth * waveformHeight];
+            for (int i = 0; i < pixels.Length; i++) 
+                pixels[i] = clearColor;
 
-            int halfH = height / 2;
-
-            // for each column compute peak amplitude
-            for (int x = 0; x < width; x++)
+            int halfHeight = waveformHeight / 2;
+            
+            for (int x = 0; x < waveformWidth; x++)
             {
                 int startSample = x * samplesPerPixel;
                 int endSample = Mathf.Min(samplesCount, startSample + samplesPerPixel);
-                float peak = 0f;
+                float sum = 0f;
 
                 for (int s = startSample; s < endSample; s++)
                 {
                     for (int ch = 0; ch < channels; ch++)
                     {
                         float v = Mathf.Abs(allSamples[s * channels + ch]);
-                        if (v > peak) peak = v;
+                            sum += v;
                     }
                 }
 
-                // normalize peak
-                peak /= maxAbs;
+                float average = sum / samplesPerPixel;
+                average  /= clipMaxPeak * (1 / scale);
 
-                int yTop = Mathf.Clamp(halfH + Mathf.RoundToInt(peak * halfH), 0, height - 1);
-                int yBottom = Mathf.Clamp(halfH - Mathf.RoundToInt(peak * halfH), 0, height - 1);
+                int yTop = Mathf.Clamp(halfHeight + Mathf.RoundToInt(average * halfHeight), 0, waveformHeight - 1);
+                int yBottom = Mathf.Clamp(halfHeight - Mathf.RoundToInt(average * halfHeight), 0, waveformHeight - 1);
 
                 // draw vertical line between yBottom and yTop (texture origin is bottom-left)
                 for (int y = yBottom; y <= yTop; y++)
                 {
-                    int idx = y * width + x;
+                    int idx = y * waveformWidth + x;
                     if (idx >= 0 && idx < pixels.Length)
                         pixels[idx] = waveformColor;
                 }
             }
 
-            // replace existing texture
-            if (waveformTexture != null)
-            {
-                Object.DestroyImmediate(waveformTexture);
-                waveformTexture = null;
-            }
+            // // replace existing texture
+            // if (waveformTexture != null)
+            // {
+            //     Object.DestroyImmediate(waveformTexture);
+            //     waveformTexture = null;
+            // }
 
-            waveformTexture = new Texture2D(width, height, TextureFormat.RGBA32, false);
+            waveformTexture = new Texture2D(waveformWidth, waveformHeight, TextureFormat.RGBA32, false);
             waveformTexture.SetPixels(pixels);
             waveformTexture.Apply();
 
@@ -335,7 +327,7 @@ namespace Editor.AudioEditor
         {
             Debug.Log("onSelectionChange");
             
-            if (SetCurrentClip()) return;
+            if (!SetCurrentClip()) return;
 
             StopPlaying();
             playheadSample = 0;
@@ -352,17 +344,17 @@ namespace Editor.AudioEditor
             {
                 debugLabel.text = "(none)";
                 // if (previewImage != null)
-                previewImage.image = null;
+                // previewImage.image = null;
                 currentClip = null;
-                return true;
+                return false;
             }
             
             debugLabel.text = Selection.activeObject.name;
             currentClip = Selection.activeObject as AudioClip;
             
             if (currentClip == null)
-                return true;
-            return false;
+                return false;
+            return true;
         }
 
         [MenuItem("Tools/AudioPlayer")]
