@@ -5,7 +5,7 @@ MonoImporter:
   serializedVersion: 2
   defaultReferences:
   - m_ViewDataDictionary: {instanceID: 0}
-  - settings: {fileID: 11400000, guid: 995fdaf671c4b4515b47403f390308a0, type: 2}
+  - markerManager: {fileID: 11400000, guid: cc9504b993be642feaa4e8e43dc72bf7, type: 2}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 

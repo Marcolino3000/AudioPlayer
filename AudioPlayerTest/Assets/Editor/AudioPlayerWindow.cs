@@ -28,12 +28,16 @@ namespace Editor.AudioEditor
         private StyleSheet borderStylesheet;
 
         private AudioPlayerSettings settings;
+        [SerializeField] private MarkerManager markerManager;
 
         public void CreateGUI()
         {
+            Debug.Log("create gui");
             LoadStyleSheets();
             LoadAudioPlayerSettings();
             ApplyAudioPlayerSettings();
+            FindMarkerManager();
+            
 
             debugLabel = new Label(Selection.activeObject != null ? Selection.activeObject.name : "(none)");
             rootVisualElement.Add(debugLabel);
@@ -42,14 +46,57 @@ namespace Editor.AudioEditor
             AddPlayButton();
 
             AddWaveformImageContainer();
+            rootVisualElement.Add(waveformImageContainer);
             AddWaveformImage();
+            waveformImageContainer.Add(previewImage);
             AddPlayhead();
+            RenderClipMarkers();
         }
 
-  
 
-#region Visual Elements
-        
+        public void OnSelectionChange()
+        {
+            Debug.Log("onSelectionChange");
+
+            if (!SetCurrentClip()) return;
+
+            StopPlaying();
+            playheadSample = 0;
+
+            ApplyAudioPlayerSettings();
+            //
+            AddWaveformImageContainer();
+            AddWaveformImage();
+
+            UpdateWaveformTexture();
+            AddPlayhead();
+            RenderPlayhead();
+            RenderClipMarkers();
+        }
+
+        private void FindMarkerManager()
+        {
+            if (markerManager == null)
+            {
+                string[] guids = AssetDatabase.FindAssets("t:MarkerManager");
+                if (guids.Length > 0)
+                {
+                    string path = AssetDatabase.GUIDToAssetPath(guids[0]);
+                    markerManager = AssetDatabase.LoadAssetAtPath<MarkerManager>(path);
+                }
+                else
+                {
+                        
+                }
+                {
+                    Debug.LogWarning("MarkerManager asset not found in project.");
+                }
+            }
+        }
+
+
+        #region Visual Elements
+
         private void LoadStyleSheets()
         {
             string[] guids = AssetDatabase.FindAssets("t:StyleSheet");
@@ -63,6 +110,7 @@ namespace Editor.AudioEditor
                 Debug.Log("no styles found");
             }
         }
+
         private void AddPlayhead()
         {
             playheadElement = new VisualElement();
@@ -78,22 +126,31 @@ namespace Editor.AudioEditor
 
         private void AddWaveformImage()
         {
+            if(previewImage != null && rootVisualElement.Contains(previewImage))
+                rootVisualElement.Remove(previewImage);
+            
             previewImage = new Image();
             previewImage.style.flexGrow = 1;
             previewImage.style.position = Position.Absolute;
-            waveformImageContainer.Add(previewImage);
-            
+
             waveformImageContainer.styleSheets.Add(borderStylesheet);
+            waveformImageContainer.AddToClassList("waveformImage");
             
+            waveformImageContainer.Add(previewImage);
+
             previewImage.RegisterCallback<PointerDownEvent>(OnWaveformClicked);
+            previewImage.RegisterCallback<PointerDownEvent>(OnWaveformRightClicked);
         }
 
         private void AddWaveformImageContainer()
         {
+            if(waveformImageContainer != null && rootVisualElement.Contains(waveformImageContainer))
+                rootVisualElement.Remove(waveformImageContainer);
+            
             waveformImageContainer = new VisualElement();
             waveformImageContainer.style.flexGrow = 1;
-            waveformImageContainer.style.height = waveformHeight;
 
+            waveformImageContainer.style.position = Position.Relative;
             rootVisualElement.Add(waveformImageContainer);
         }
 
@@ -113,6 +170,7 @@ namespace Editor.AudioEditor
             });
             rootVisualElement.Add(scaleSlider);
         }
+
         #endregion
 
         private void LoadAudioPlayerSettings()
@@ -161,6 +219,62 @@ namespace Editor.AudioEditor
             }
         }
 
+        private void OnWaveformRightClicked(PointerDownEvent evt)
+        {
+            if (evt.button != 1) // Only respond to right mouse button
+                return;
+
+            Debug.Log("right-clicked waveform");
+            
+            float localX = evt.localPosition.x;
+            localX = Mathf.Clamp(localX, 0, waveformWidth - 1);
+            float normalized = localX / waveformWidth;
+            int sample = Mathf.RoundToInt(normalized * (currentClip.samples - 1));
+            
+            // AddMarker(sample, localX);
+            int id = markerManager.AddMarker(currentClip, sample);
+            Debug.Log("Marker added.");
+            RenderClipMarkers();
+            
+        }
+
+        private void RenderClipMarkers()
+        {
+            if (currentClip == null || markerManager == null) return;
+
+            foreach (var pos in markerManager.GetMarkerPositions(currentClip))
+            {
+                float normalized = (float)pos / currentClip.samples;
+                float localX = normalized * waveformWidth;
+                AddMarkerVisualElement(pos, localX);
+            }
+        }
+
+        private void AddMarkerVisualElement(int sample, float localX)
+        {
+            var marker = new VisualElement();
+            marker.style.position = Position.Absolute;
+            marker.style.left = localX;
+            marker.style.top = 0;
+            marker.style.width = 4;
+            marker.style.height = waveformHeight;
+            marker.style.backgroundColor = Color.gold;
+
+            marker.RegisterCallback<PointerDownEvent>(evt =>
+            {
+                if (evt.button == 1)
+                {
+                    Debug.Log("right-clicked marker");
+                    waveformImageContainer.Remove(marker);
+                    markerManager.RemoveMarkerBySample(currentClip, sample);
+                    Debug.Log("Marker removed.");
+                }
+            });
+
+            waveformImageContainer.Add(marker);
+            // markerManager.AddMarker(currentClip, sample);
+        }
+
         private void OnPlayButtonClicked()
         {
             if (currentClip == null)
@@ -197,10 +311,11 @@ namespace Editor.AudioEditor
         {
             if (!isPlaying || currentClip == null)
                 return;
-
+            
             playheadSample = AudioUtilWrapper.GetPreviewClipSamplePosition();
             RenderPlayhead();
-
+            markerManager.CheckPlayhead(currentClip, playheadSample);
+            
             if (!AudioUtilWrapper.IsPreviewClipPlaying())
             {
                 // isPlaying = false;
@@ -245,6 +360,7 @@ namespace Editor.AudioEditor
                 return;
             }
 
+            
             int samplesCount = currentClip.samples;
             int channels = currentClip.channels;
             if (samplesCount <= 0 || channels <= 0)
@@ -320,22 +436,7 @@ namespace Editor.AudioEditor
             if (previewImage != null)
                 previewImage.image = waveformTexture;
 
-            RenderPlayhead();
-        }
-
-        public void OnSelectionChange()
-        {
-            Debug.Log("onSelectionChange");
-            
-            if (!SetCurrentClip()) return;
-
-            StopPlaying();
-            playheadSample = 0;
-            
-            ApplyAudioPlayerSettings();
-
-            UpdateWaveformTexture();
-            RenderPlayhead();
+            // RenderPlayhead();
         }
 
         private bool SetCurrentClip()

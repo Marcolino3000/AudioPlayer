@@ -1,53 +1,66 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using Sirenix.OdinInspector;
+using UnityEngine;
 
 namespace Editor.AudioEditor
 {
-    public class MarkerManager
+    [CreateAssetMenu(menuName = "AudioEditor/MarkerManager")]
+    public class MarkerManager : SerializedScriptableObject
     {
-    
-        public class Marker
-        {
-            public int id;
-            public int sample;
-            public Marker(int id, int sample)
-            {
-                this.id = id;
-                this.sample = sample;
-            }
-        }
-
-        private int lastPlayheadSample = -1;
-        private List<Marker> markers = new List<Marker>();
-        private int nextId = 1;
+        public int lastPlayheadSample = -1;
+        public Dictionary<AudioClip, List<Marker>> clipsToMarkers = new();
+        public int nextId = 1;
 
         public event Action<int> OnMarkerReached;
 
-        public Marker AddMarker(int sample)
+        public int AddMarker(AudioClip clip, int sample)
         {
+            if (!clipsToMarkers.TryGetValue(clip, out var markers))
+            {
+                markers = new List<Marker>();
+                clipsToMarkers[clip] = markers;
+            }
             var marker = new Marker(nextId++, sample);
             markers.Add(marker);
-            return marker;
+            return marker.Id;
         }
 
-        public void RemoveMarker(int id)
+        public void RemoveMarker(AudioClip clip, int id)
         {
-            markers.RemoveAll(m => m.id == id);
-        }
-
-        public List<Marker> GetMarkers()
-        {
-            return markers;
-        }
-
-        public void CheckPlayhead(int playheadSample)
-        {
-            foreach (var marker in markers)
+            if (clipsToMarkers.TryGetValue(clip, out var markers))
             {
-                // Fire event if playhead crosses marker (forward only)
-                if (lastPlayheadSample < marker.sample && playheadSample >= marker.sample)
+                markers.RemoveAll(m => m.Id == id);
+            }
+        }
+        
+        public void RemoveMarkerBySample(AudioClip clip, int sample)
+        {
+            if (clipsToMarkers.TryGetValue(clip, out var markers))
+            {
+                markers.RemoveAll(m => m.Sample == sample);
+            }
+        }
+
+        public List<int> GetMarkerPositions(AudioClip clip)
+        {
+            if (clipsToMarkers.TryGetValue(clip, out var markers))
+                return markers.Select(m => m.Sample).ToList();
+            return new List<int>();
+        }
+
+        public void CheckPlayhead(AudioClip clip, int playheadSample)
+        {
+            if (clipsToMarkers.TryGetValue(clip, out var markers))
+            {
+                foreach (var marker in markers)
                 {
-                    OnMarkerReached?.Invoke(marker.id);
+                    if (lastPlayheadSample < marker.Sample && playheadSample >= marker.Sample)
+                    {
+                        OnMarkerReached?.Invoke(marker.Id);
+                        Debug.Log("marker reached: " + marker.Id);
+                    }
                 }
             }
             lastPlayheadSample = playheadSample;
@@ -58,10 +71,25 @@ namespace Editor.AudioEditor
             lastPlayheadSample = -1;
         }
 
-        public int? GetMarkerAtSample(int sample)
+        public bool ExistsMarkerAtSample(AudioClip clip, int sample)
         {
-            var marker = markers.Find(m => m.sample == sample);
-            return marker?.id;
+            if (clipsToMarkers.TryGetValue(clip, out var markers))
+            {
+                var marker = markers.Find(m => m.Sample == sample);
+                return marker != null;
+            }
+            return false;
+        }
+        
+        public class Marker
+        {
+            public readonly int Id;
+            public readonly int Sample;
+            public Marker(int id, int sample)
+            {
+                Id = id;
+                Sample = sample;
+            }
         }
     }
 }
