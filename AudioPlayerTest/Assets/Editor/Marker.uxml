@@ -1,4 +1,6 @@
 <ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
-    <ui:VisualElement name="line" style="flex-grow: 1; background-image: resource(&apos;toppng.com-horizontal-white-line-png-4408x2548&apos;); background-size: 25px 50%; position: absolute; right: 0; bottom: 0; left: 0; top: -138px;" />
-    <ui:VisualElement name="triangle" style="flex-grow: 1; background-image: resource(&apos;play-icon-white-triangle-down&apos;); background-size: 20px 20px; top: -200px;" />
+    <ui:VisualElement style="flex-grow: 0; background-size: 30px 100px; flex-shrink: 0;">
+        <ui:VisualElement name="line" style="flex-grow: 0; background-image: resource(&apos;toppng.com-horizontal-white-line-png-4408x2548&apos;); background-size: 133px 51px; position: absolute; right: 2px; bottom: 0; left: 32px; top: -5px; flex-shrink: 0; -unity-background-scale-mode: stretch-to-fill; width: 33px; height: 250px;" />
+        <ui:VisualElement name="triangle" style="flex-grow: 1; background-image: resource(&apos;play-icon-white-triangle-down&apos;); background-size: 40px 40px; top: 0; flex-shrink: 0; position: absolute; width: 20px; height: 20px; left: 38px; -unity-background-scale-mode: stretch-to-fill;" />
+    </ui:VisualElement>
 </ui:UXML>

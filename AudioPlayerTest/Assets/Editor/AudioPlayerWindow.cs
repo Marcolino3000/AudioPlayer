@@ -33,6 +33,7 @@ namespace Editor.AudioEditor
         [SerializeField] private MarkerManager markerManager;
 
         private VisualElement timeBarElement;
+        private TemplateContainer customPlayButton;
 
         private VisualElement CreateTimeBarElement()
         {
@@ -110,6 +111,7 @@ namespace Editor.AudioEditor
             waveformImageContainer.Add(previewImage);
             AddPlayhead();
             RenderClipMarkers();
+            // rootVisualElement.Add(customPlayButton);
         }
 
 
@@ -151,7 +153,6 @@ namespace Editor.AudioEditor
             }
         }
 
-
         #region Visual Elements
 
         private void LoadStyleSheets()
@@ -170,14 +171,14 @@ namespace Editor.AudioEditor
 
         private void AddPlayhead()
         {
-            // playhead = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Assets/Editor/Marker.uxml");
-            // playheadElement = playhead.CloneTree();
-            playheadElement = new VisualElement();
+            playhead = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Assets/Editor/Marker.uxml");
+            playheadElement = playhead.CloneTree();
+            // playheadElement = new VisualElement();
             playheadElement.style.position = Position.Absolute;
-            playheadElement.style.top = 0;
+            playheadElement.style.top = -25;
             playheadElement.style.height = waveformHeight;
             playheadElement.style.width = settings.playheadWidth;
-            playheadElement.style.backgroundColor = settings.playheadColor;
+            // playheadElement.style.backgroundColor = settings.playheadColor;
             waveformImageContainer.Add(playheadElement);
 
             playheadSample = 0;
@@ -221,6 +222,27 @@ namespace Editor.AudioEditor
         {
             playButton = new Button(OnPlayButtonClicked) { text = "Play" };
             rootVisualElement.Add(playButton);
+
+            // var button = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Assets/Editor/PlayButton.uxml");
+            // customPlayButton = button.CloneTree();
+            
+            // customPlayButton.RegisterCallback<PointerDownEvent>(OnPlayButtonClicked);
+            
+        }
+
+        private void OnPlayButtonClicked(PointerDownEvent evt)
+        {
+            if (currentClip == null)
+                return;
+
+            if (!isPlaying)
+            {
+                StartPlaying();
+            }
+            else
+            {
+                StopPlaying();
+            }
         }
 
         private void AddScaleSlider()
@@ -356,7 +378,7 @@ namespace Editor.AudioEditor
         private void StartPlaying()
         {
             isPlaying = true;
-            playButton.text = "Stop";
+            // playButton.text = "Stop";
             AudioUtilWrapper.StopAllPreviewClips();
             AudioUtilWrapper.PlayPreviewClip(currentClip, playheadSample, false);
             EditorApplication.update += UpdatePlayheadDuringPlayback;
@@ -365,7 +387,7 @@ namespace Editor.AudioEditor
         private void StopPlaying()
         {
             isPlaying = false;
-            playButton.text = "Play";
+            // playButton.text = "Play";
             AudioUtilWrapper.StopAllPreviewClips();
             EditorApplication.update -= UpdatePlayheadDuringPlayback;
         }
@@ -401,7 +423,7 @@ namespace Editor.AudioEditor
             int samplesCount = currentClip != null ? currentClip.samples : 1;
             float normalized = samplesCount > 1 ? (float)playheadSample / (float)samplesCount : 0f;
             int x = Mathf.Clamp(Mathf.RoundToInt(normalized * waveformWidth), 0, waveformWidth - playheadWidth);
-            playheadElement.style.left = x;
+            playheadElement.style.left = x - playheadElement.resolvedStyle.width / 2;
             // playheadElement.style.height = waveformHeight;
             // playheadElement.style.width = playheadWidth;
         }

@@ -14,11 +14,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp-Editor::Editor.AudioEditor.AudioPlayerSettings
   waveformWidth: 1000
   waveformHeight: 200
-  waveformColor: {r: 1, g: 1, b: 1, a: 1}
+  waveformColor: {r: 0.31594875, g: 0.7449074, b: 0.9433962, a: 1}
   waveformBackgroundColor: {r: 0.16470589, g: 0.16470589, b: 0.16470589, a: 1}
   gridColor: {r: 0.5566038, g: 0.5566038, b: 0.5566038, a: 1}
   playheadColor: {r: 0.018244924, g: 0.7735849, b: 0.10032754, a: 1}
-  playheadWidth: 3
+  playheadWidth: 77
   markerColor: {r: 0.9951428, g: 1, b: 0, a: 1}
   markerWidth: 2
   waveformScale: 0
