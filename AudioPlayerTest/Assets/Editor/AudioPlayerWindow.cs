@@ -7,6 +7,8 @@ namespace Editor.AudioEditor
 {
     public class AudioPlayerWindow : EditorWindow
     {
+        [SerializeField] private VisualTreeAsset playhead;
+        
         private Label debugLabel;
         private AudioClip currentClip;
         private Image previewImage;
@@ -30,6 +32,61 @@ namespace Editor.AudioEditor
         private AudioPlayerSettings settings;
         [SerializeField] private MarkerManager markerManager;
 
+        private VisualElement timeBarElement;
+
+        private VisualElement CreateTimeBarElement()
+        {
+            var timeBar = new VisualElement();
+            timeBar.style.flexDirection = FlexDirection.Row;
+            timeBar.style.height = 20;
+            timeBar.style.width = waveformWidth;
+            timeBar.style.position = Position.Relative;
+            timeBar.style.marginBottom = 2;
+            timeBar.style.backgroundColor = settings.waveformBackgroundColor;
+
+            if (currentClip == null)
+                return timeBar;
+
+            float clipLength = currentClip.length;
+            int tenths = Mathf.CeilToInt(clipLength * 10f);
+            float pixelsPerTenth = waveformWidth / (clipLength * 10f);
+
+            for (int t = 0; t <= tenths; t++)
+            {
+                int x = Mathf.RoundToInt(t * pixelsPerTenth);
+                var gridLine = new VisualElement();
+                gridLine.style.position = Position.Absolute;
+                gridLine.style.left = x;
+                gridLine.style.top = 0;
+                gridLine.style.width = 1;
+                if (t % 10 == 0)
+                {
+                    // Full second: full height line and label
+                    gridLine.style.height = 20;
+                    gridLine.style.backgroundColor = settings.gridColor;
+                    timeBar.Add(gridLine);
+
+                    int second = t / 10;
+                    var label = new Label(second.ToString());
+                    label.style.position = Position.Absolute;
+                    label.style.left = x + 2;
+                    label.style.top = 0;
+                    label.style.width = 32;
+                    label.style.color = settings.gridColor;
+                    label.style.unityTextAlign = TextAnchor.MiddleLeft;
+                    timeBar.Add(label);
+                }
+                else
+                {
+                    // Tenth: quarter height line
+                    gridLine.style.height = 5;
+                    gridLine.style.backgroundColor = settings.gridColor;
+                    timeBar.Add(gridLine);
+                }
+            }
+            return timeBar;
+        }
+
         public void CreateGUI()
         {
             Debug.Log("create gui");
@@ -37,13 +94,15 @@ namespace Editor.AudioEditor
             LoadAudioPlayerSettings();
             ApplyAudioPlayerSettings();
             FindMarkerManager();
-            
 
             debugLabel = new Label(Selection.activeObject != null ? Selection.activeObject.name : "(none)");
             rootVisualElement.Add(debugLabel);
 
             AddScaleSlider();
             AddPlayButton();
+
+            timeBarElement = CreateTimeBarElement();
+            rootVisualElement.Add(timeBarElement);
 
             AddWaveformImageContainer();
             rootVisualElement.Add(waveformImageContainer);
@@ -113,12 +172,14 @@ namespace Editor.AudioEditor
 
         private void AddPlayhead()
         {
+            // playhead = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Assets/Editor/Marker.uxml");
+            // playheadElement = playhead.CloneTree();
             playheadElement = new VisualElement();
             playheadElement.style.position = Position.Absolute;
             playheadElement.style.top = 0;
             playheadElement.style.height = waveformHeight;
-            playheadElement.style.width = playheadWidth;
-            playheadElement.style.backgroundColor = playheadColor;
+            playheadElement.style.width = settings.playheadWidth;
+            playheadElement.style.backgroundColor = settings.playheadColor;
             waveformImageContainer.Add(playheadElement);
             
             playheadSample = 0;
@@ -260,9 +321,9 @@ namespace Editor.AudioEditor
             marker.style.position = Position.Absolute;
             marker.style.left = localX;
             marker.style.top = 0;
-            marker.style.width = 4;
+            marker.style.width = settings.markerWidth;
             marker.style.height = waveformHeight;
-            marker.style.backgroundColor = Color.gold;
+            marker.style.backgroundColor = settings.markerColor;
 
             marker.RegisterCallback<PointerDownEvent>(evt =>
             {
@@ -424,6 +485,12 @@ namespace Editor.AudioEditor
                 previewImage.image = waveformTexture;
 
             // RenderPlayhead();
+            // After updating waveform, update time bar
+            if (timeBarElement != null && rootVisualElement.Contains(timeBarElement))
+                rootVisualElement.Remove(timeBarElement);
+            timeBarElement = CreateTimeBarElement();
+            rootVisualElement.Insert(3, timeBarElement); // Insert above waveform container
+            Debug.Log("TimeBar: refreshed in UpdateWaveformTexture");
         }
 
         private bool SetCurrentClip()

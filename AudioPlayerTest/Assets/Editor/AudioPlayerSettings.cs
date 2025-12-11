@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace Editor.AudioEditor
 {
@@ -13,6 +14,10 @@ namespace Editor.AudioEditor
         public Color waveformColor;
         public Color waveformBackgroundColor;
         public Color gridColor;
+        public Color playheadColor;
+        public int playheadWidth;
+        public Color markerColor;
+        public int markerWidth;
         public float waveformScale;
     }
 }
