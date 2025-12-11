@@ -1,0 +1,6 @@
+:root {
+}
+
+EnumField > Label {
+    display: none;
+}

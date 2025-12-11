@@ -15,9 +15,7 @@ MonoBehaviour:
   serializationData:
     SerializedFormat: 2
     SerializedBytes: 
-    ReferencedUnityObjects:
-    - {fileID: 8300000, guid: 759b73aa02f0443d7ac75d57a9331b5a, type: 3}
-    - {fileID: 8300000, guid: 09bd6d505a64949e9ba01e619434982c, type: 3}
+    ReferencedUnityObjects: []
     SerializedBytesString: 
     Prefab: {fileID: 0}
     PrefabModificationsReferencedUnityObjects: []
@@ -36,116 +34,12 @@ MonoBehaviour:
       Data: 
     - Name: 
       Entry: 12
-      Data: 2
-    - Name: 
-      Entry: 7
-      Data: 
-    - Name: $k
-      Entry: 10
       Data: 0
-    - Name: $v
-      Entry: 7
-      Data: 2|System.Collections.Generic.List`1[[Editor.AudioEditor.MarkerManager+Marker,
-        Assembly-CSharp-Editor]], mscorlib
-    - Name: 
-      Entry: 12
-      Data: 3
-    - Name: 
-      Entry: 7
-      Data: 3|Editor.AudioEditor.MarkerManager+Marker, Assembly-CSharp-Editor
-    - Name: Id
-      Entry: 3
-      Data: 464
-    - Name: Sample
-      Entry: 3
-      Data: 108038
-    - Name: 
-      Entry: 8
-      Data: 
-    - Name: 
-      Entry: 7
-      Data: 4|Editor.AudioEditor.MarkerManager+Marker, Assembly-CSharp-Editor
-    - Name: Id
-      Entry: 3
-      Data: 465
-    - Name: Sample
-      Entry: 3
-      Data: 95012
-    - Name: 
-      Entry: 8
-      Data: 
-    - Name: 
-      Entry: 7
-      Data: 5|Editor.AudioEditor.MarkerManager+Marker, Assembly-CSharp-Editor
-    - Name: Id
-      Entry: 3
-      Data: 466
-    - Name: Sample
-      Entry: 3
-      Data: 25541
-    - Name: 
-      Entry: 8
-      Data: 
     - Name: 
       Entry: 13
       Data: 
     - Name: 
       Entry: 8
       Data: 
-    - Name: 
-      Entry: 8
-      Data: 
-    - Name: 
-      Entry: 7
-      Data: 
-    - Name: $k
-      Entry: 10
-      Data: 1
-    - Name: $v
-      Entry: 7
-      Data: 6|System.Collections.Generic.List`1[[Editor.AudioEditor.MarkerManager+Marker,
-        Assembly-CSharp-Editor]], mscorlib
-    - Name: 
-      Entry: 12
-      Data: 2
-    - Name: 
-      Entry: 7
-      Data: 7|Editor.AudioEditor.MarkerManager+Marker, Assembly-CSharp-Editor
-    - Name: Id
-      Entry: 3
-      Data: 473
-    - Name: Sample
-      Entry: 3
-      Data: 56296
-    - Name: 
-      Entry: 8
-      Data: 
-    - Name: 
-      Entry: 7
-      Data: 8|Editor.AudioEditor.MarkerManager+Marker, Assembly-CSharp-Editor
-    - Name: Id
-      Entry: 3
-      Data: 474
-    - Name: Sample
-      Entry: 3
-      Data: 77460
-    - Name: 
-      Entry: 8
-      Data: 
-    - Name: 
-      Entry: 13
-      Data: 
-    - Name: 
-      Entry: 8
-      Data: 
-    - Name: 
-      Entry: 8
-      Data: 
-    - Name: 
-      Entry: 13
-      Data: 
-    - Name: 
-      Entry: 8
-      Data: 
-  lastPlayheadSample: 178787
-  nextId: 475
+  lastPlayheadSample: 129178
+  nextId: 504

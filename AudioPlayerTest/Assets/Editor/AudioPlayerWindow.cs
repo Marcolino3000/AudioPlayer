@@ -21,7 +21,6 @@ namespace Editor.AudioEditor
         
         private VisualElement playheadElement;
         private int playheadSample = 0;
-        private Color playheadColor = Color.red;
         private int playheadWidth = 2;
 
         private Button playButton;
@@ -123,7 +122,7 @@ namespace Editor.AudioEditor
             playheadSample = 0;
 
             ApplyAudioPlayerSettings();
-            //
+            
             AddWaveformImageContainer();
             AddWaveformImage();
 
@@ -144,9 +143,6 @@ namespace Editor.AudioEditor
                     markerManager = AssetDatabase.LoadAssetAtPath<MarkerManager>(path);
                 }
                 else
-                {
-                        
-                }
                 {
                     Debug.LogWarning("MarkerManager asset not found in project.");
                 }
@@ -348,13 +344,15 @@ namespace Editor.AudioEditor
 
         private void AddMarkerVisualElement(int sample, float localX)
         {
-            var marker = new VisualElement();
+            var ve = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Assets/Editor/SmallTriangleMarker.uxml");
+            var marker = ve.CloneTree();
+            // var marker = new VisualElement();
             marker.style.position = Position.Absolute;
             marker.style.left = localX;
-            marker.style.top = waveformHeight * 0.91f;
-            marker.style.width = settings.markerWidth;
-            marker.style.height = waveformHeight * 0.1f;
-            marker.style.backgroundColor = settings.markerColor;
+            marker.style.top = waveformHeight - 42;
+            // marker.style.width = settings.markerWidth;
+            // marker.style.height = waveformHeight * 0.1f;
+            // marker.style.backgroundColor = settings.markerColor;
 
             marker.RegisterCallback<PointerDownEvent>(evt =>
             {

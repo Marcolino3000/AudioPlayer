@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using DefaultNamespace;
 using Sirenix.OdinInspector;
 using UnityEngine;
 
@@ -13,7 +14,7 @@ namespace Editor.AudioEditor
         public Dictionary<AudioClip, List<Marker>> clipsToMarkers = new();
         public int nextId = 1;
 
-        public event Action<MarkerType> OnMarkerReached;
+        public event Action<Expressions> OnMarkerReached;
 
         public int AddMarker(AudioClip clip, int sample)
         {
@@ -58,7 +59,7 @@ namespace Editor.AudioEditor
                 {
                     if (lastPlayheadSample < marker.Sample && playheadSample >= marker.Sample)
                     {
-                        OnMarkerReached?.Invoke(marker.Type);
+                        OnMarkerReached?.Invoke(marker.Expression);
                         Debug.Log("marker reached: " + marker.Id);
                     }
                 }
@@ -85,20 +86,12 @@ namespace Editor.AudioEditor
         {
             public readonly int Id;
             public readonly int Sample;
-            public readonly MarkerType Type = MarkerType.DefaultExpression;
+            public readonly Expressions Expression = Expressions.Neutral;
             public Marker(int id, int sample)
             {
                 Id = id;
                 Sample = sample;
             }
         }
-    }
-
-    public enum MarkerType
-    {
-        DefaultExpression, 
-        HappyExpression,
-        SadExpression,
-        AngryExpression,
     }
 }
