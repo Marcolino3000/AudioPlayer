@@ -12,6 +12,7 @@ namespace Editor.AudioEditor
         public int waveformHeight;
         public Color waveformColor;
         public Color waveformBackgroundColor;
+        public Color gridColor;
         public float waveformScale;
     }
 }

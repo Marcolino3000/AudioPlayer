@@ -374,16 +374,11 @@ namespace Editor.AudioEditor
             bool hasRetrievedData = currentClip.GetData(allSamples, 0);
             if (!hasRetrievedData) return;
 
-            // int width = waveformWidth;
-            // int height = waveformHeight;
-
             int samplesPerPixel = Mathf.Max(1, Mathf.CeilToInt((float)samplesCount / waveformWidth));
-            
             float clipMaxPeak = 0f;
             for (int i = 0; i < allSamples.Length; i++)
             {
                 float abs = Mathf.Abs(allSamples[i]);
-                
                 if (abs > clipMaxPeak) 
                     clipMaxPeak = abs;
             }
@@ -395,28 +390,23 @@ namespace Editor.AudioEditor
                 pixels[i] = clearColor;
 
             int halfHeight = waveformHeight / 2;
-            
             for (int x = 0; x < waveformWidth; x++)
             {
                 int startSample = x * samplesPerPixel;
                 int endSample = Mathf.Min(samplesCount, startSample + samplesPerPixel);
                 float sum = 0f;
-
                 for (int s = startSample; s < endSample; s++)
                 {
                     for (int ch = 0; ch < channels; ch++)
                     {
                         float v = Mathf.Abs(allSamples[s * channels + ch]);
-                            sum += v;
+                        sum += v;
                     }
                 }
-
                 float average = sum / samplesPerPixel;
                 average  /= clipMaxPeak * (1 / scale);
-
                 int yTop = Mathf.Clamp(halfHeight + Mathf.RoundToInt(average * halfHeight), 0, waveformHeight - 1);
                 int yBottom = Mathf.Clamp(halfHeight - Mathf.RoundToInt(average * halfHeight), 0, waveformHeight - 1);
-
                 // draw vertical line between yBottom and yTop (texture origin is bottom-left)
                 for (int y = yBottom; y <= yTop; y++)
                 {
@@ -425,13 +415,6 @@ namespace Editor.AudioEditor
                         pixels[idx] = settings.waveformColor;
                 }
             }
-
-            // // replace existing texture
-            // if (waveformTexture != null)
-            // {
-            //     Object.DestroyImmediate(waveformTexture);
-            //     waveformTexture = null;
-            // }
 
             waveformTexture = new Texture2D(waveformWidth, waveformHeight, TextureFormat.RGBA32, false);
             waveformTexture.SetPixels(pixels);
