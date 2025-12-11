@@ -115,8 +115,6 @@ namespace Editor.AudioEditor
 
         public void OnSelectionChange()
         {
-            Debug.Log("onSelectionChange");
-
             if (!SetCurrentClip()) return;
 
             StopPlaying();
@@ -181,7 +179,7 @@ namespace Editor.AudioEditor
             playheadElement.style.width = settings.playheadWidth;
             playheadElement.style.backgroundColor = settings.playheadColor;
             waveformImageContainer.Add(playheadElement);
-            
+
             playheadSample = 0;
         }
 
