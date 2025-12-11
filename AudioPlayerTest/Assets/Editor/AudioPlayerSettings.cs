@@ -11,7 +11,8 @@ namespace Editor.AudioEditor
         [Min(1)]
         public int waveformHeight;
         public Color waveformColor;
-        public float scale;
+        public Color waveformBackgroundColor;
+        public float waveformScale;
     }
 }
 

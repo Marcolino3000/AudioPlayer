@@ -148,8 +148,12 @@ namespace Editor.AudioEditor
                 rootVisualElement.Remove(waveformImageContainer);
             
             waveformImageContainer = new VisualElement();
-            waveformImageContainer.style.flexGrow = 1;
-
+            // waveformImageContainer.style.flexGrow = 1;
+            waveformImageContainer.style.backgroundColor = settings.waveformBackgroundColor;
+            
+            waveformImageContainer.style.width = settings.waveformWidth + 5;
+            waveformImageContainer.style.height = settings.waveformHeight + 5;
+            
             waveformImageContainer.style.position = Position.Relative;
             rootVisualElement.Add(waveformImageContainer);
         }
@@ -418,7 +422,7 @@ namespace Editor.AudioEditor
                 {
                     int idx = y * waveformWidth + x;
                     if (idx >= 0 && idx < pixels.Length)
-                        pixels[idx] = waveformColor;
+                        pixels[idx] = settings.waveformColor;
                 }
             }
 
