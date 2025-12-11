@@ -220,7 +220,18 @@ namespace Editor.AudioEditor
 
         private void AddPlayButton()
         {
-            playButton = new Button(OnPlayButtonClicked) { text = "Play" };
+            playButton = new Button(OnPlayButtonClicked)
+            {
+                text = "Play",
+                style =
+                {
+                    width = 100,
+                    height = 30,
+                    marginTop = 5,
+                    marginBottom = 5, 
+                    alignSelf = Align.Center
+                }
+            };
             rootVisualElement.Add(playButton);
 
             // var button = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Assets/Editor/PlayButton.uxml");
@@ -340,9 +351,9 @@ namespace Editor.AudioEditor
             var marker = new VisualElement();
             marker.style.position = Position.Absolute;
             marker.style.left = localX;
-            marker.style.top = 0;
+            marker.style.top = waveformHeight * 0.91f;
             marker.style.width = settings.markerWidth;
-            marker.style.height = waveformHeight;
+            marker.style.height = waveformHeight * 0.1f;
             marker.style.backgroundColor = settings.markerColor;
 
             marker.RegisterCallback<PointerDownEvent>(evt =>
