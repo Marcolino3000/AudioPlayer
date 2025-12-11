@@ -387,7 +387,7 @@ namespace Editor.AudioEditor
         private void StartPlaying()
         {
             isPlaying = true;
-            // playButton.text = "Stop";
+            playButton.text = "Stop";
             AudioUtilWrapper.StopAllPreviewClips();
             AudioUtilWrapper.PlayPreviewClip(currentClip, playheadSample, false);
             EditorApplication.update += UpdatePlayheadDuringPlayback;
@@ -396,7 +396,7 @@ namespace Editor.AudioEditor
         private void StopPlaying()
         {
             isPlaying = false;
-            // playButton.text = "Play";
+            playButton.text = "Play";
             AudioUtilWrapper.StopAllPreviewClips();
             EditorApplication.update -= UpdatePlayheadDuringPlayback;
         }
@@ -519,7 +519,6 @@ namespace Editor.AudioEditor
                 rootVisualElement.Remove(timeBarElement);
             timeBarElement = CreateTimeBarElement();
             rootVisualElement.Insert(3, timeBarElement); // Insert above waveform container
-            Debug.Log("TimeBar: refreshed in UpdateWaveformTexture");
         }
 
         private bool SetCurrentClip()
