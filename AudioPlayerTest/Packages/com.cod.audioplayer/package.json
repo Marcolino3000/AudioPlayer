@@ -1,0 +1,12 @@
+{
+  "name": "com.cod.audioplayer",
+  "version": "0.0.1",
+  "displayName": "Audio Player",
+  "unity": "",
+  "dependencies": {
+  },
+  "author": {
+    "name": "Marc"
+  },
+  "hideInEditor": false
+}

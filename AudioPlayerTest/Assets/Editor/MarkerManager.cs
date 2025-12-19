@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using DefaultNamespace;
 using Sirenix.OdinInspector;
 using UnityEngine;
 
@@ -93,6 +92,15 @@ namespace Editor.AudioEditor
                 Id = id;
                 Sample = sample;
             }
+        }
+        
+        public enum Expressions 
+        {
+            Neutral,
+            Eyeroll,
+            Happy,
+            Sad,
+            Angry,
         }
     }
 }
