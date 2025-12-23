@@ -167,7 +167,7 @@ namespace Editor.AudioEditor
 
         private void AddPlayhead()
         {
-            playhead = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Assets/Editor/Marker.uxml");
+            playhead = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Packages/com.cod.audioplayer/Editor/Marker.uxml");
             playheadElement = playhead.CloneTree();
             // playheadElement = new VisualElement();
             playheadElement.style.position = Position.Absolute;
@@ -344,7 +344,7 @@ namespace Editor.AudioEditor
 
         private void AddMarkerVisualElement(int sample, float localX)
         {
-            var ve = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Assets/Editor/SmallTriangleMarker.uxml");
+            var ve = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Packages/com.cod.audioplayer/Editor/SmallTriangleMarker.uxml");
             var marker = ve.CloneTree();
             // var marker = new VisualElement();
             marker.style.position = Position.Absolute;
