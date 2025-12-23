@@ -1,0 +1,3 @@
+[submodule "AudioPlayerTest/Packages/com.cod.audioplayer"]
+	path = AudioPlayerTest/Packages/com.cod.audioplayer
+	url = https://github.com/Marcolino3000/AudioPlayer-Package.git
